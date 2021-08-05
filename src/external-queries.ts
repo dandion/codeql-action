@@ -30,11 +30,14 @@ export async function checkoutExternalRepository(
 
   if (!fs.existsSync(checkoutLocation)) {
     const repoCloneURL = buildCheckoutURL(repository, apiDetails);
-    await new toolrunner.ToolRunner(await safeWhich.safeWhich("git"), [
-      "clone",
-      repoCloneURL,
-      checkoutLocation,
-    ]).exec();
+    await new toolrunner.ToolRunner(
+      await safeWhich.safeWhich("git"),
+      ["clone", repoCloneURL, checkoutLocation],
+      {
+        // avoid leaking the x-access-token from the `repoCloneURL`
+        silent: true,
+      }
+    ).exec();
     await new toolrunner.ToolRunner(await safeWhich.safeWhich("git"), [
       `--work-tree=${checkoutLocation}`,
       `--git-dir=${checkoutLocation}/.git`,
